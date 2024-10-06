@@ -17,7 +17,11 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        loadComponent: () => import('./auth/auth/auth.component').then(m => m.AuthComponent)
+        redirectTo: 'login'
+      },
+      {
+        path: ':mode',
+        loadComponent: () => import('./auth/auth/auth.component').then(m => m.AuthComponent),
       },
       {
         path: 'action',
