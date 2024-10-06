@@ -20,13 +20,13 @@ export const routes: Routes = [
         redirectTo: 'login'
       },
       {
+        path: 'action',
+        loadComponent: () => import('./auth/action/action.component').then(m => m.ActionComponent)
+      },
+      {
         path: ':mode',
         loadComponent: () => import('./auth/auth/auth.component').then(m => m.AuthComponent),
       },
-      {
-        path: 'action',
-        loadComponent: () => import('./auth/action/action.component').then(m => m.ActionComponent)
-      }
     ]
   },
 
