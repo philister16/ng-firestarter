@@ -23,7 +23,15 @@
     }
   </div>
 
-  <button type="submit" [disabled]="authForm.invalid">{{ dictionary() }}</button>
+  @if (error) {
+  <div class="error">
+    {{ error }}
+  </div>
+  }
+
+  <button type="submit" [disabled]="authForm.invalid || isLoading">
+    {{ isLoading ? 'Loading...' : dictionary() }}
+  </button>
 </form>
 <a *ngIf="mode() != 'signup'" [routerLink]="['/auth', 'signup']">Signup</a>
 <a *ngIf="mode() != 'login'" [routerLink]="['/auth', 'login']">Login</a>

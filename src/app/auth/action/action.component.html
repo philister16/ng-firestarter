@@ -1,7 +1,9 @@
-@if (isWorking) {
+@if (isWorking()) {
 <p>Working...</p>
+} @else if (errorMessage()) {
+<p>Error: {{ errorMessage() }}</p>
+} @else if (isComplete()) {
+<p>{{ successMessage() }}</p>
 } @else {
-<div>
-  <p>Done!</p>
-</div>
+<p>Waiting for action...</p>
 }

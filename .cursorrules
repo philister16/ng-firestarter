@@ -5,3 +5,6 @@ Always use standalone components.
 Always use signals, avoid Observeables when signals can be used.
 Always use Angular's HTTPClient.
 Always use Angular Fire 18.
+Never apply styles.
+Always use try/catch blocks.
+Add comments if code is not obvious.
