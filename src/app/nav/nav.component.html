@@ -1,7 +1,15 @@
 <nav>
   <a routerLink="/home">Home</a> |
   <a routerLink="/account">Account</a> |
-  <a routerLink="/auth/login">Logout</a>
+  @if (isLoggedIn()) {
+  <span>Hello, {{ currentUser()?.email }}</span> |
+  <a routerLink="/auth/login" (click)="logout()">Logout</a>
+  }
+  @if (!isEmailVerified()) {
+  <div>Please verify your email
+    <button (click)="resendEmailVerification()">Send verification email</button>
+  </div>
+  }
 </nav>
 
 <router-outlet></router-outlet>

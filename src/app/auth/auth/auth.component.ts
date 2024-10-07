@@ -49,7 +49,9 @@ export class AuthComponent implements OnInit {
     try {
       switch (this.mode()) {
         case 'login':
-          // Handle login
+          await this.authService.login(email, password);
+          console.log('Login successful');
+          this.router.navigate(['/home']);
           break;
         case 'signup':
           await this.authService.signup(email, password);
