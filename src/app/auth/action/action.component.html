@@ -1,9 +1,19 @@
 @if (isWorking()) {
 <p>Working...</p>
 } @else if (errorMessage()) {
-<p>Error: {{ errorMessage() }}</p>
-} @else if (isComplete()) {
+<p>{{ errorMessage() }}</p>
+} @else if (successMessage()) {
 <p>{{ successMessage() }}</p>
 } @else {
 <p>Waiting for action...</p>
+}
+
+@if (successMessage() || errorMessage()) {
+
+@if (mode === 'verifyAndChangeEmail' || mode === 'recoverEmail') {
+<a routerLink="/auth">Login</a>
+} @else {
+<a routerLink="/">Home</a>
+}
+
 }

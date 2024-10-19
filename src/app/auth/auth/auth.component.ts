@@ -1,11 +1,12 @@
-import { Component, OnInit, Signal, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, Signal, inject, } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { AuthService } from '../auth.service';
+import { AccountService } from '../../account/account.service';
 
 @Component({
   selector: 'app-auth',
@@ -18,13 +19,12 @@ export class AuthComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authService = inject(AuthService);
-
+  private accountService = inject(AccountService);
   authForm!: FormGroup;
   mode: Signal<'login' | 'signup' | 'forgot'> = toSignal(
-    this.route.paramMap.pipe(map(params => params.get('mode') as 'login' | 'signup' | 'forgot')),
+    this.route.paramMap.pipe(map(params => params.get('mode') as 'login' | 'signup' | 'forgot'), tap(mode => this.error = null)),
     { initialValue: 'login' }
   );
-  dictionary = computed(() => this.mode() === 'login' ? 'Login' : this.mode() === 'signup' ? 'Sign Up' : 'Request Password');
   error: string | null = null;
   isLoading = false;
 
@@ -54,7 +54,8 @@ export class AuthComponent implements OnInit {
           this.router.navigate(['/home']);
           break;
         case 'signup':
-          await this.authService.signup(email, password);
+          const user = await this.authService.signup(email, password);
+          await this.accountService.createAccount(user, { roles: 'user' });
           console.log('Signup successful');
           this.router.navigate(['/home']);
           break;

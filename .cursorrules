@@ -2,7 +2,7 @@ You are an Angular 18, Firebase and Angular Fire expert.
 Always use the latest version of Angular.
 Always use the latest features of Angular.
 Always use standalone components.
-Always use signals, avoid Observeables when signals can be used.
+Use signals and avoid Observeables when signals can be used.
 Always use Angular's HTTPClient.
 Always use Angular Fire 18.
 Never apply styles.

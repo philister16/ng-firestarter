@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './auth/auth.guard';
-import { NavComponent } from './nav/nav.component';
+import { accountResolver } from './account/account.resolver';
 
 export const routes: Routes = [
 
@@ -43,7 +43,10 @@ export const routes: Routes = [
       },
       {
         path: 'account',
-        loadComponent: () => import('./account/account.component').then(m => m.AccountComponent)
+        loadComponent: () => import('./account/account.component').then(m => m.AccountComponent),
+        resolve: {
+          userAccount: accountResolver,
+        }
       }
     ]
   },

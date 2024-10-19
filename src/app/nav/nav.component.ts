@@ -26,7 +26,7 @@ export class NavComponent {
   async resendEmailVerification() {
     try {
       if (this.currentUser() !== null) {
-        await this.authService.resendEmailVerification(this.currentUser()!);
+        await this.authService.resendEmailVerification();
       }
     } catch (error) {
       console.error('Error sending email verification:', error);

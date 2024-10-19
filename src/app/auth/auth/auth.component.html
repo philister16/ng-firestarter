@@ -1,4 +1,4 @@
-<h1>{{ dictionary() }}</h1>
+<h1>{{ mode() === 'login' ? 'Login' : mode() === 'signup' ? 'Sign Up' : 'Forgot Password' }}</h1>
 <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
   <div>
     <label for="email">Email:</label>
@@ -30,7 +30,7 @@
   }
 
   <button type="submit" [disabled]="authForm.invalid || isLoading">
-    {{ isLoading ? 'Loading...' : dictionary() }}
+    {{ isLoading ? 'Loading...' : mode() === 'login' ? 'Login' : mode() === 'signup' ? 'Sign Up' : 'Forgot Password' }}
   </button>
 </form>
 <a *ngIf="mode() != 'signup'" [routerLink]="['/auth', 'signup']">Signup</a>
