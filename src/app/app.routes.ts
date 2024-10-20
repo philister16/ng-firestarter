@@ -14,6 +14,7 @@ export const routes: Routes = [
   // Unguarded routes
   {
     path: 'auth',
+    loadComponent: () => import('./auth/auth/auth.component').then(m => m.AuthComponent),
     children: [
       {
         path: '',
@@ -21,12 +22,24 @@ export const routes: Routes = [
         redirectTo: 'login'
       },
       {
-        path: 'action',
-        loadComponent: () => import('./auth/action/action.component').then(m => m.ActionComponent)
+        path: 'signup',
+        loadComponent: () => import('./auth/signup/signup.component').then(m => m.SignupComponent)
       },
       {
-        path: ':mode',
-        loadComponent: () => import('./auth/auth/auth.component').then(m => m.AuthComponent),
+        path: 'login',
+        loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
+      },
+      {
+        path: 'forgot',
+        loadComponent: () => import('./auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+      },
+      {
+        path: 'reset',
+        loadComponent: () => import('./auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+      },
+      {
+        path: 'action',
+        loadComponent: () => import('./auth/action/action.component').then(m => m.ActionComponent)
       },
     ]
   },
@@ -50,6 +63,13 @@ export const routes: Routes = [
         }
       }
     ]
+  },
+
+
+  // Unauthorized
+  {
+    path: 'unauthorized',
+    loadComponent: () => import('./auth/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent)
   },
 
   // 404

@@ -1,18 +1,18 @@
 import { CanActivateFn } from '@angular/router';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Auth } from '@angular/fire/auth';
+import { AuthService, AuthState, UnauthorizedReason } from './auth.service';
 
 export const authGuard: CanActivateFn = async (route, state) => {
   const router = inject(Router);
-  const auth = inject(Auth);
+  const authService = inject(AuthService);
 
   try {
-    await auth.authStateReady();
-    if (auth.currentUser && auth.currentUser?.emailVerified) {
+    const authState: AuthState = await authService.resolveAuthentication();
+    if (authState === AuthState.VERIFIED) {
       return true;
-    } else if (auth.currentUser && !auth.currentUser?.emailVerified) {
-      router.navigate(['/auth', 'verify'], { queryParams: { returnUrl: state.url } });
+    } else if (authState === AuthState.AUTHENTICATED) {
+      router.navigate(['/unauthorized'], { queryParams: { returnUrl: state.url, reason: UnauthorizedReason.EMAIL_NOT_VERIFIED } });
       return false;
     } else {
       router.navigate(['/auth', 'login'], { queryParams: { returnUrl: state.url } });

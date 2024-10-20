@@ -28,9 +28,10 @@ export class AccountService {
 
   async createAccount(user: User, accountData: Partial<UserAccount>): Promise<void> {
     try {
-      const userRef = doc(this.firestore, `users/${user.uid}`);
-      await setDoc(userRef, accountData);
-      this.accountSignal.update(account => ({ ...account, ...accountData } as UserAccount));
+      const { uid, email, emailVerified } = user;
+      const userRef = doc(this.firestore, `users/${uid}`);
+      await setDoc(userRef, { ...accountData, uid, email, emailVerified });
+      this.accountSignal.set({ uid, email: email ?? '', emailVerified, ...accountData });
     } catch (error: any) {
       console.error('Error creating user document:', error);
       throw error;

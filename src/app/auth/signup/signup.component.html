@@ -1,0 +1,29 @@
+<h2>Sign Up</h2>
+<form *ngIf="!successMessage()" [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+  <div>
+    <label for="email">Email:</label>
+    <input type="email" id="email" formControlName="email">
+    <div *ngIf="signupForm.get('email')?.invalid && signupForm.get('email')?.touched">
+      <small *ngIf="signupForm.get('email')?.errors?.['required']">Email is required.</small>
+      <small *ngIf="signupForm.get('email')?.errors?.['email']">Please enter a valid email address.</small>
+    </div>
+  </div>
+  <div>
+    <label for="password">Password:</label>
+    <input type="password" id="password" formControlName="password">
+    <div *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched">
+      <small *ngIf="signupForm.get('password')?.errors?.['required']">Password is required.</small>
+      <small *ngIf="signupForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters
+        long.</small>
+    </div>
+  </div>
+  <button type="submit" [disabled]="signupForm.invalid || isLoading()">{{ isLoading() ? 'Signing up...' : 'Sign Up'
+    }}</button>
+</form>
+
+@if (successMessage()) {
+<p>{{ successMessage() }}</p>
+}
+@if (errorMessage()) {
+<p>{{ errorMessage() }}</p>
+}
