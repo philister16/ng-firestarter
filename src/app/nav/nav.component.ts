@@ -1,7 +1,8 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { AuthService } from '../auth/auth.service';
-
+import { sendEmailVerification } from '@angular/fire/auth';
+import { AccountService } from '../account/account.service';
 @Component({
   selector: 'app-nav',
   standalone: true,
@@ -10,14 +11,13 @@ import { AuthService } from '../auth/auth.service';
   styleUrl: './nav.component.css'
 })
 export class NavComponent {
-  private authService = inject(AuthService);
-  readonly currentUser = this.authService.currentUser;
-  readonly isLoggedIn = this.authService.isLoggedIn;
-  readonly isEmailVerified = computed(() => this.currentUser()?.emailVerified ?? false);
+  private auth = inject(Auth);
+  private accountService = inject(AccountService);
+  readonly account = this.accountService.account;
 
   async logout() {
     try {
-      await this.authService.logout();
+      await this.auth.signOut();
     } catch (error) {
       console.error('Error during logout:', error);
     }
@@ -25,12 +25,11 @@ export class NavComponent {
 
   async resendEmailVerification() {
     try {
-      if (this.currentUser() !== null) {
-        await this.authService.resendEmailVerification();
+      if (this.auth.currentUser) {
+        await sendEmailVerification(this.auth.currentUser);
       }
     } catch (error) {
       console.error('Error sending email verification:', error);
     }
   }
-
 }

@@ -4,16 +4,28 @@
 <p>{{ errorMessage() }}</p>
 } @else if (successMessage()) {
 <p>{{ successMessage() }}</p>
-} @else {
-<p>Waiting for action...</p>
+}
+
+@if (mode === 'resetPassword' && !successMessage() && !errorMessage()) {
+<h2>Reset Password</h2>
+<form #resetForm="ngForm" (ngSubmit)="onResetPassword(resetForm)">
+  <div>
+    <label for="password">New Password:</label>
+    <input type="password" id="password" name="password" ngModel required minlength="6">
+  </div>
+  <div>
+    <label for="confirmPassword">Confirm Password:</label>
+    <input type="password" id="confirmPassword" name="confirmPassword" ngModel required>
+  </div>
+  <button type="submit" [disabled]="!resetForm.form.valid">Reset Password</button>
+</form>
+<p>Don't want to reset your password? <a routerLink="/auth/login">Cancel</a></p>
 }
 
 @if (successMessage() || errorMessage()) {
-
 @if (mode === 'verifyAndChangeEmail' || mode === 'recoverEmail') {
 <a routerLink="/auth">Login</a>
 } @else {
 <a routerLink="/">Home</a>
 }
-
 }

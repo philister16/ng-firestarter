@@ -1,5 +1,5 @@
 <div>
-  <p>Current Email: {{ email() }}</p>
+  <p>Current Email: {{ email }}</p>
   <p *ngIf="successMessage">{{ successMessage() }}</p>
   <p *ngIf="errorMessage">{{ errorMessage() }}</p>
   <form [formGroup]="changeEmailForm" (ngSubmit)="onSubmit()">

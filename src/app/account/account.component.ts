@@ -3,6 +3,7 @@ import { ProfileEditComponent } from './profile-edit/profile-edit.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { AccountService } from './account.service';
+
 @Component({
   selector: 'app-account',
   standalone: true,
@@ -12,6 +13,5 @@ import { AccountService } from './account.service';
 })
 export class AccountComponent {
   readonly accountService = inject(AccountService);
-  // Route resolver fetches the user account data!
-  readonly userAccount = this.accountService.currentAccount;
+  readonly account = this.accountService.account;
 }

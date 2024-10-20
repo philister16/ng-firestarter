@@ -1,11 +1,11 @@
 <nav>
   <a routerLink="/home">Home</a> |
   <a routerLink="/account">Account</a> |
-  @if (isLoggedIn()) {
-  <span>Hello, {{ currentUser()?.email }}</span> |
+  @if (account()) {
+  <span>{{ account()?.email }}</span> |
   <a routerLink="/auth/login" (click)="logout()">Logout</a>
   }
-  @if (!isEmailVerified()) {
+  @if (account() && !account()?.emailVerified) {
   <div>Please verify your email
     <button (click)="resendEmailVerification()">Send verification email</button>
   </div>

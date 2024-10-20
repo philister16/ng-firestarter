@@ -35,6 +35,7 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
+    canActivateChild: [authGuard],
     loadComponent: () => import('./nav/nav.component').then(m => m.NavComponent),
     children: [
       {
@@ -53,7 +54,11 @@ export const routes: Routes = [
 
   // 404
   {
-    path: '**',
+    path: '404',
     loadComponent: () => import('./not-found/not-found.component').then(m => m.NotFoundComponent)
+  },
+  {
+    path: '**',
+    redirectTo: '404'
   }
 ];

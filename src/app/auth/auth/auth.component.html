@@ -1,38 +1,48 @@
-<h1>{{ mode() === 'login' ? 'Login' : mode() === 'signup' ? 'Sign Up' : 'Forgot Password' }}</h1>
-<form [formGroup]="authForm" (ngSubmit)="onSubmit()">
-  <div>
-    <label for="email">Email:</label>
-    <input id="email" formControlName="email" type="email" />
-    @if (authForm.get('email')?.invalid && authForm.get('email')?.touched) {
+<div *ngIf="mode() !== 'verify'">
+  <h2>{{ mode() === 'login' ? 'Log In' : (mode() === 'signup' ? 'Sign Up' : 'Forgot Password') }}</h2>
+
+  <form (ngSubmit)="onSubmit()" #authForm="ngForm">
     <div>
-      <small *ngIf="authForm.get('email')?.errors?.['required']">Email is required.</small>
-      <small *ngIf="authForm.get('email')?.errors?.['email']">Invalid email format.</small>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" ngModel required email #emailInput="ngModel">
+      <p *ngIf="emailInput.invalid && authForm.submitted">Please enter a valid email address.</p>
+    </div>
+
+    @if (mode() !== 'forgot') {
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" ngModel required minlength="6" #passwordInput="ngModel">
+      <p *ngIf="passwordInput.invalid && authForm.submitted">Password must be at least 6 characters long.</p>
     </div>
     }
-  </div>
 
-  <div *ngIf="mode() != 'forgot'">
-    <label for="password">Password:</label>
-    <input id="password" formControlName="password" type="password" />
-    @if (authForm.get('password')?.invalid && authForm.get('password')?.touched) {
-    <div>
-      <small *ngIf="authForm.get('password')?.errors?.['required']">Password is required.</small>
-      <small *ngIf="authForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters
-        long.</small>
-    </div>
-    }
-  </div>
+    <button type="submit" [disabled]="authForm.invalid || isLoading()">
+      {{ isLoading() ? 'Processing...' : (mode() === 'login' ? 'Log In' : (mode() === 'signup' ? 'Sign Up' :
+      'Reset Password')) }}
+    </button>
+  </form>
 
-  @if (error) {
-  <div class="error">
-    {{ error }}
-  </div>
+  @if (mode() === 'login') {
+  <p>Don't have an account? <a routerLink="/auth/signup">Sign up</a></p>
+  <p>Forgot your password? <a routerLink="/auth/forgot">Reset it</a></p>
+  } @else if (mode() === 'signup') {
+  <p>Already have an account? <a routerLink="/auth/login">Log in</a></p>
+  } @else if (mode() === 'forgot') {
+  <p>Remember your password? <a routerLink="/auth/login">Log in</a></p>
+  <p>Don't have an account? <a routerLink="/auth/signup">Sign up</a></p>
   }
+</div>
 
-  <button type="submit" [disabled]="authForm.invalid || isLoading">
-    {{ isLoading ? 'Loading...' : mode() === 'login' ? 'Login' : mode() === 'signup' ? 'Sign Up' : 'Forgot Password' }}
-  </button>
-</form>
-<a *ngIf="mode() != 'signup'" [routerLink]="['/auth', 'signup']">Signup</a>
-<a *ngIf="mode() != 'login'" [routerLink]="['/auth', 'login']">Login</a>
-<a *ngIf="mode() != 'forgot'" [routerLink]="['/auth', 'forgot']">Forgot password</a>
+<div *ngIf="mode() === 'verify'">
+  <h2>Verify Email</h2>
+  <p>You must verify your email to continue.</p>
+  <p>Didn't receive the email? <button (click)="sendVerificationEmail()">Resend</button></p>
+</div>
+
+@if (errorMessage()) {
+<p class="error">{{ errorMessage() }}</p>
+}
+
+@if (successMessage()) {
+<p class="success">{{ successMessage() }}</p>
+}

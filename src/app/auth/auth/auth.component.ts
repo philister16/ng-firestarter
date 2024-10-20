@@ -1,74 +1,85 @@
-import { Component, OnInit, Signal, inject, } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+import { Component, inject, ViewChild, signal, computed, effect } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map, tap } from 'rxjs/operators';
-import { AuthService } from '../auth.service';
+import { map } from 'rxjs/operators';
+import { FormsModule, NgForm } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { AccountService } from '../../account/account.service';
+import { Auth, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [FormsModule, CommonModule, RouterLink],
   templateUrl: './auth.component.html'
 })
-export class AuthComponent implements OnInit {
-  private fb = inject(FormBuilder);
+export class AuthComponent {
+  @ViewChild('authForm') authForm!: NgForm;
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private authService = inject(AuthService);
+  private auth = inject(Auth);
   private accountService = inject(AccountService);
-  authForm!: FormGroup;
-  mode: Signal<'login' | 'signup' | 'forgot'> = toSignal(
-    this.route.paramMap.pipe(map(params => params.get('mode') as 'login' | 'signup' | 'forgot'), tap(mode => this.error = null)),
-    { initialValue: 'login' }
-  );
-  error: string | null = null;
-  isLoading = false;
+  errorMessage = signal('');
+  successMessage = signal('');
+  isLoading = signal(false);
+  mode = toSignal(this.route.paramMap.pipe(
+    map(params => {
+      const mode = params.get('mode') as 'login' | 'signup' | 'forgot' | 'verify';
+      if (!['login', 'signup', 'forgot', 'verify'].includes(mode)) {
+        this.router.navigateByUrl('/404');
+      }
+      return mode;
+    })
+  ));
 
-  ngOnInit(): void {
-    this.authForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
-    });
-  }
+  async onSubmit() {
+    if (this.authForm.invalid) return;
 
-  async onSubmit(): Promise<void> {
-    if (this.authForm.invalid) {
-      console.error('Invalid form values: ', this.authForm.value);
-      return;
-    }
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.isLoading.set(true);
 
     const { email, password } = this.authForm.value;
 
-    this.isLoading = true;
-    this.error = null;
-
     try {
-      switch (this.mode()) {
-        case 'login':
-          await this.authService.login(email, password);
-          console.log('Login successful');
-          this.router.navigate(['/home']);
-          break;
-        case 'signup':
-          const user = await this.authService.signup(email, password);
-          await this.accountService.createAccount(user, { roles: 'user' });
-          console.log('Signup successful');
-          this.router.navigate(['/home']);
-          break;
-        case 'forgot':
-          // Handle forgot password
-          break;
-      }
-    } catch (err: any) {
-      console.error('Auth error:', err);
-      this.error = err.message;
+      await this.handleAuthAction(email, password);
+    } catch (error: any) {
+      this.errorMessage.set(error.message);
     } finally {
-      this.isLoading = false;
       this.authForm.reset();
+      this.isLoading.set(false);
+    }
+  }
+
+  private async handleAuthAction(email: string, password: string): Promise<void> {
+    switch (this.mode()) {
+      case 'login':
+        await signInWithEmailAndPassword(this.auth, email, password);
+        this.router.navigate(['/home']);
+        break;
+      case 'signup':
+        const { user } = await createUserWithEmailAndPassword(this.auth, email, password);
+        await sendEmailVerification(user);
+        await this.accountService.createAccount(user, { roles: 'user' });
+        this.successMessage.set('Account created successfully. Please check your email for verification.');
+        break;
+      case 'forgot':
+        await sendPasswordResetEmail(this.auth, email);
+        this.successMessage.set('Password reset email sent. Please check your inbox.');
+        break;
+    }
+  }
+
+  async sendVerificationEmail() {
+    try {
+      const user = this.auth.currentUser;
+      if (user) {
+        await sendEmailVerification(user);
+        this.successMessage.set('Verification email sent. Please check your inbox and click the link to verify your email.');
+      }
+    } catch (error: any) {
+      this.errorMessage.set(error.message);
     }
   }
 }
