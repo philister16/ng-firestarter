@@ -21,6 +21,9 @@ export class AccountService {
 
   async createAccount(user: User, accountData: Partial<UserAccount>): Promise<void> {
     try {
+      if (!user) {
+        throw new Error('No user provided');
+      }
       // save in DB
       const userRef = doc(this.firestore, `users/${user.uid}`);
       await setDoc(userRef, accountData);
@@ -45,6 +48,9 @@ export class AccountService {
 
   async getAccount(user: User): Promise<Partial<UserAccount> | null> {
     try {
+      if (!user) {
+        throw new Error('No user provided');
+      }
       // get from DB
       const userRef = doc(this.firestore, `users/${user.uid}`);
       const userSnapshot = await getDoc(userRef);
@@ -74,6 +80,19 @@ export class AccountService {
     } catch (error: any) {
       this.handleError(error);
     }
+  }
+
+  /**
+   * Patch user data on account
+   * @dev for use in auth service only!
+   * @param user
+   */
+  patchUserDataOnAccount(user: User | null): void {
+    if (!user || null) {
+      this.accountSignal.set(null);
+      return;
+    }
+    this.accountSignal.update(account => ({ ...account, ...this.prepareUserData(user) } as UserAccount));
   }
 
   private prepareUserData(user: User): { email: string, displayName: string, photoURL: string } {
@@ -112,7 +131,7 @@ export class AccountService {
           throw new Error('An unexpected error occurred. Please try again.');
       }
     } else {
-      throw new Error('An unexpected error occurred. Please try again.');
+      throw new Error(error.message || 'An unexpected error occurred. Please try again.');
     }
   }
 }

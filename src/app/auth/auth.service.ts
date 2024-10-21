@@ -50,6 +50,7 @@ export class AuthService {
   constructor() {
     onAuthStateChanged(this.auth, (user) => {
       this.userSignal.set(user);
+      this.accountService.patchUserDataOnAccount(user);
     });
   }
 
