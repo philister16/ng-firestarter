@@ -4,7 +4,9 @@ import { User } from '@angular/fire/auth';
 import { FirebaseError } from 'firebase/app';
 
 export interface UserAccount {
+  uid?: string;
   email?: string;
+  emailVerified?: boolean;
   displayName?: string;
   photoURL?: string;
 }
@@ -95,9 +97,9 @@ export class AccountService {
     this.accountSignal.update(account => ({ ...account, ...this.prepareUserData(user) } as UserAccount));
   }
 
-  private prepareUserData(user: User): { email: string, displayName: string, photoURL: string } {
-    const { email, displayName, photoURL } = user;
-    return { email: email ?? '', displayName: displayName ?? '', photoURL: photoURL ?? '' };
+  private prepareUserData(user: User): { email: string, emailVerified: boolean, uid: string } {
+    const { email, emailVerified, uid } = user;
+    return { email: email ?? '', emailVerified: emailVerified ?? false, uid: uid ?? '' };
   }
 
   private handleError(error: any): never {

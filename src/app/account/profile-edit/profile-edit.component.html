@@ -1,3 +1,13 @@
 <h2>Profile</h2>
-<p>Name: {{ account()?.displayName }}</p>
+<div>
+  <form [formGroup]="nameForm" (ngSubmit)="saveName()">
+    <label for="displayName">Name:</label>
+    <input id="displayName" formControlName="displayName" (ngModelChange)="nameHasChanged.set(true)" />
+    @if (nameForm.invalid && nameForm.touched) {
+    <p *ngIf="nameForm.get('displayName')?.errors?.['minlength']">Name must be between 6 and 32 characters</p>
+    }
+    <button [disabled]="!nameHasChanged() || isSavingName()" type="submit">{{ isSavingName() ? 'Saving...' : 'Save'
+      }}</button>
+  </form>
+</div>
 <p>photoURL: {{ account()?.photoURL }}</p>

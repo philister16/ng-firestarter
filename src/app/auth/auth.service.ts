@@ -1,5 +1,5 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
-import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, User } from '@angular/fire/auth';
+import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, updateProfile, User } from '@angular/fire/auth';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { FirebaseError } from 'firebase/app';
 import { AccountService } from '../account/account.service';
@@ -40,8 +40,8 @@ export class AuthService {
   readonly user = computed(() => this.userSignal());
   readonly userData = computed(() => {
     if (this.user()) {
-      const { email, emailVerified, uid, displayName, photoURL } = this.user()!;
-      return { email, emailVerified, uid, displayName, photoURL };
+      const { email, emailVerified, uid } = this.user()!;
+      return { email, emailVerified, uid };
     }
     return null;
   });
