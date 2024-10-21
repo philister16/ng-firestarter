@@ -57,7 +57,7 @@ export class AuthService {
     try {
       const { user } = await createUserWithEmailAndPassword(this.auth, email, password);
       await sendEmailVerification(user);
-      await this.accountService.createAccount(user, { roles: 'user' });
+      await this.accountService.createAccount(user, {});
       return user;
     } catch (error) {
       this.handleAuthenticationError(error as FirebaseError);
