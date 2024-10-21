@@ -38,6 +38,13 @@ export class AuthService {
   private authErrorSignal = signal<string | null>(null);
 
   readonly user = computed(() => this.userSignal());
+  readonly userData = computed(() => {
+    if (this.user()) {
+      const { email, emailVerified, uid, displayName, photoURL } = this.user()!;
+      return { email, emailVerified, uid, displayName, photoURL };
+    }
+    return null;
+  });
   readonly authError = computed(() => this.authErrorSignal());
 
   constructor() {
@@ -122,6 +129,17 @@ export class AuthService {
           throw new Error('Invalid action mode');
       }
       return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async resendEmailVerification(): Promise<void> {
+    try {
+      if (!this.auth.currentUser) {
+        throw new Error('No user is currently signed in.');
+      }
+      await sendEmailVerification(this.auth.currentUser);
     } catch (error) {
       throw error;
     }

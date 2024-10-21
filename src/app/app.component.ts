@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { AccountService } from './account/account.service';
 import { JsonPipe } from '@angular/common';
+import { AuthService } from './auth/auth.service';
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -11,6 +12,6 @@ import { JsonPipe } from '@angular/common';
 })
 export class AppComponent {
   title = 'ng-firestarter';
-  readonly accountService = inject(AccountService);
-  readonly account = this.accountService.account;
+  private authService = inject(AuthService);
+  readonly user = this.authService.userData;
 }
