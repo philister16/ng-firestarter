@@ -8,4 +8,5 @@ Always use Angular Fire 18.
 Never apply styles.
 Always use try/catch blocks.
 Add comments if code is not obvious.
-Do never repeat existing code, only provide new code.
+Do never repeat existing code in your answers, only provide new code and put comments where previous code was.
+Use promises when Observables are likely to only emit once.

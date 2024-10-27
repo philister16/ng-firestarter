@@ -1,8 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
-import { AccountService } from '../account.service';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, signal, input, OnInit, output } from '@angular/core';
+import { UserAccount } from '../account.service';
+import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../auth/auth.service';
+import { DbStatus } from '../../core/interfaces';
+
 @Component({
   selector: 'app-profile-edit',
   standalone: true,
@@ -10,40 +11,27 @@ import { AuthService } from '../../auth/auth.service';
   templateUrl: './profile-edit.component.html',
   styleUrl: './profile-edit.component.css'
 })
-export class ProfileEditComponent {
-  private authService = inject(AuthService);
-  private user = this.authService.user;
-  private accountService = inject(AccountService);
-  readonly account = this.accountService.account;
+export class ProfileEditComponent implements OnInit {
+  account = input<UserAccount | null>();
+  dbStatus = input<DbStatus>([false, '', '']);
+  onUpdate = output<Partial<UserAccount>>();
   nameHasChanged = signal(false);
-  isSavingName = signal(false);
-  resultMessage = signal('');
   private fb = inject(FormBuilder);
-  nameForm = this.fb.nonNullable.group({
-    displayName: [this.account()?.displayName, [Validators.minLength(3), Validators.maxLength(32)]]
-  });
+  nameForm!: FormGroup;
 
+  ngOnInit(): void {
+    this.nameForm = this.fb.nonNullable.group({
+      displayName: [this.account()?.displayName, [Validators.minLength(3), Validators.maxLength(32)]]
+    });
+  }
 
   // Add methods for updating profile
-  async saveName(): Promise<void> {
+  saveName() {
     if (this.nameForm.invalid) {
       return;
     }
-    try {
-      this.isSavingName.set(true);
-      const { displayName } = this.nameForm.value;
-      if (!this.user()) {
-        throw new Error('No user found');
-      }
-      const { uid } = this.user()!;
-      await this.accountService.updateAccount(uid, { displayName });
-      this.resultMessage.set('Name updated successfully');
-    } catch (error) {
-      this.resultMessage.set('Failed to update name');
-      throw error;
-    } finally {
-      this.nameHasChanged.set(false);
-      this.isSavingName.set(false);
-    }
+    const { displayName } = this.nameForm.value;
+    this.onUpdate.emit({ displayName });
+    this.nameHasChanged.set(false);
   }
 }

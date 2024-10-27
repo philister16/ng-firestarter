@@ -6,8 +6,7 @@
     @if (nameForm.invalid && nameForm.touched) {
     <p *ngIf="nameForm.get('displayName')?.errors?.['minlength']">Name must be between 6 and 32 characters</p>
     }
-    <button [disabled]="!nameHasChanged() || isSavingName()" type="submit">{{ isSavingName() ? 'Saving...' : 'Save'
+    <button [disabled]="!nameHasChanged() || dbStatus()[0]" type="submit">{{ dbStatus()[0] ? 'Saving...' : 'Save'
       }}</button>
   </form>
 </div>
-<p>photoURL: {{ account()?.photoURL }}</p>

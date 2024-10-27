@@ -1,8 +1,18 @@
 <h1>Account</h1>
-<app-profile-edit></app-profile-edit>
+@if (dbStatus()[0]) {
+<p>Updating...</p>
+} @else if (dbStatus()[1]) {
+<p>{{ dbStatus()[1] }}</p>
+} @else {
+<p>{{ dbStatus()[2] }}</p>
+}
+<app-profile-edit [account]="account()" (onUpdate)="updateAccount($event)" [dbStatus]="dbStatus()"></app-profile-edit>
+<hr>
+<h2>Profile picture</h2>
+<app-avatar-edit [account]="account()" (onUpdate)="updateAccount($event)" [dbStatus]="dbStatus()"></app-avatar-edit>
 <hr>
 <h2>Email</h2>
-<app-change-email [email]="account()?.email"></app-change-email>
+<!-- <app-change-email [email]="account()?.email"></app-change-email> -->
 <hr>
 <h2>Password</h2>
 <app-change-password></app-change-password>
