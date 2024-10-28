@@ -1,5 +1,5 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
-import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, updateProfile, User, UserProfile } from '@angular/fire/auth';
+import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, updateProfile, User, UserProfile, verifyBeforeUpdateEmail } from '@angular/fire/auth';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { FirebaseError } from 'firebase/app';
 import { AccountService, UserAccount } from '../account/account.service';
@@ -130,15 +130,14 @@ export class AuthService {
       await applyActionCode(this.auth, oobCode);
       switch (mode) {
         case ActionMode.VERIFY_EMAIL:
-          await this.auth.currentUser?.reload();
-          this.userSignal.set(this.auth.currentUser);
+          await this.reloadCurrentUser();
           result = { mode, success: true, message: 'Email verified successfully.' };
           break;
         case ActionMode.RECOVER_EMAIL:
-          result = { mode, success: true, message: 'Email recovered successfully.' };
+          result = { mode, success: true, message: 'Email recovered successfully. Please login again with your recovered email.' };
           break;
         case ActionMode.VERIFY_AND_CHANGE_EMAIL:
-          result = { mode, success: true, message: 'Email verified and changed successfully.' };
+          result = { mode, success: true, message: 'Email verified and changed successfully. Please login again with your new email.' };
           break;
         default:
           throw new Error('Invalid action mode');
@@ -160,6 +159,18 @@ export class AuthService {
     }
   }
 
+  async verifyBeforeUpdateEmail(newEmail: string, password: string): Promise<void> {
+    try {
+      if (!this.auth.currentUser) {
+        throw new Error('No user is currently signed in.');
+      }
+      await reauthenticateWithCredential(this.auth.currentUser, EmailAuthProvider.credential(this.auth.currentUser.email ?? '', password));
+      await verifyBeforeUpdateEmail(this.auth.currentUser, newEmail);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async resolveAuthentication(): Promise<AuthState> {
     try {
       await this.auth.authStateReady();
@@ -174,6 +185,14 @@ export class AuthService {
     } catch (error) {
       throw error;
     }
+  }
+
+  private async reloadCurrentUser(): Promise<void> {
+    if (!this.auth.currentUser) {
+      throw new Error('No user is currently signed in.');
+    }
+    await this.auth.currentUser.reload();
+    this.userSignal.set(this.auth.currentUser);
   }
 
   private patchUserSignal(user: Partial<User>) {

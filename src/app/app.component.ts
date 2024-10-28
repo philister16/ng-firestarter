@@ -16,7 +16,7 @@ export class AppComponent {
   private authService = inject(AuthService);
   readonly user = this.authService.user;
   readonly userCompact = computed(() => {
-    const { uid, email, emailVerified, displayName, photoURL } = this.user()?.auth || {};
-    return { auth: { uid, email, emailVerified, displayName, photoURL }, account: this.user()?.account };
+    const { uid, email, emailVerified } = this.user()?.auth || {};
+    return { auth: { uid, email, emailVerified }, account: this.user()?.account };
   });
 }

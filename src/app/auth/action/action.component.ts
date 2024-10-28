@@ -45,13 +45,21 @@ export class ActionComponent implements OnInit {
       if (!result.success) {
         throw new Error('Could not handle action');
       }
-
-      if (result.mode === ActionMode.VERIFY_EMAIL) {
-        this.router.navigate(['/']);
-      } else {
-        this.successMessage.set(result.message);
+      switch (result.mode) {
+        case ActionMode.VERIFY_EMAIL:
+          this.router.navigate(['/']);
+          break;
+        case ActionMode.RECOVER_EMAIL:
+          this.authService.signOut();
+          this.successMessage.set(result.message);
+          break;
+        case ActionMode.VERIFY_AND_CHANGE_EMAIL:
+          this.authService.signOut();
+          this.successMessage.set(result.message);
+          break;
+        default:
+          this.successMessage.set(result.message);
       }
-
     } catch (error: any) {
       switch (error.code) {
         case 'auth/invalid-action-code':

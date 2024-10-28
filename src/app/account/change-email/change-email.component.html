@@ -1,7 +1,7 @@
+<h2>Email</h2>
 <div>
-  <p>Current Email: {{ email }}</p>
-  <p *ngIf="successMessage">{{ successMessage() }}</p>
-  <p *ngIf="errorMessage">{{ errorMessage() }}</p>
+  <p>Current Email: {{ email() }}</p>
+  @if (showUpdate()) {
   <form [formGroup]="changeEmailForm" (ngSubmit)="onSubmit()">
     <div>
       <label for="newEmail">New Email:</label>
@@ -11,8 +11,16 @@
       <label for="password">Password:</label>
       <input type="password" id="password" formControlName="password">
     </div>
-    <button type="submit" [disabled]="!changeEmailForm.valid || isLoading()">
-      {{ isLoading() ? 'Working...' : 'Update Email' }}
+    <button type="submit" [disabled]="!changeEmailForm.valid || dbStatus()[0]">
+      {{ dbStatus()[0] ? 'Working...' : 'Update Email' }}
     </button>
   </form>
+  }
+  @if (dbStatus()[1]) {
+  <p>{{ dbStatus()[1] }}</p>
+  } @else if (dbStatus()[2]) {
+  <p>{{ dbStatus()[2] }}</p>
+  } @else {
+  <button (click)="toggleUpdate()">{{ showUpdate() ? 'Cancel' : 'Update' }}</button>
+  }
 </div>
