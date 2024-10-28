@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject, updateMetadata, UploadTask, UploadTaskSnapshot } from '@angular/fire/storage';
+import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject, updateMetadata, UploadTaskSnapshot } from '@angular/fire/storage';
 import { FirebaseError } from 'firebase/app';
 
 export interface UploadProgress {
@@ -82,7 +82,7 @@ export class StorageService {
     return getDownloadURL(storageRef);
   }
 
-  resizeImage(file: File, properties: ImageProperties): Promise<File> {
+  resizeImage(file: File, properties: ImageProperties, type: string = 'image/webp'): Promise<File> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.src = URL.createObjectURL(file);
@@ -107,14 +107,14 @@ export class StorageService {
         canvas.toBlob((blob) => {
           if (blob) {
             const resizedFile = new File([blob], file.name, {
-              type: properties.type || 'image/jpeg',
+              type,
               lastModified: Date.now(),
             });
             resolve(resizedFile);
           } else {
             reject(new Error('Canvas to Blob conversion failed'));
           }
-        }, 'image/jpeg', 0.95); // You can adjust quality here
+        }, type, 1); // You can adjust quality here
       };
       img.onerror = (error) => reject(error);
     });

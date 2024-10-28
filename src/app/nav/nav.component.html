@@ -2,19 +2,20 @@
   <a routerLink="/home">Home</a> |
   <a routerLink="/account">Account</a> |
   @if (user()) {
-  <span>{{ user()?.email }}</span> |
+  <span>{{ user()?.auth?.email }}</span> |
   <a routerLink="/auth/login" (click)="logout()">Logout</a>
   }
-  @if (user() && !user()?.emailVerified) {
+  @if (user() && !user()?.auth?.emailVerified) {
   <div>Please verify your email
-    <button (click)="resendEmailVerification()">Send verification email</button>
+    <button (click)="resendEmailVerification()" [disabled]="status()[0]">
+      {{ status()[0] ? 'Sending...' : 'Send verification email' }}
+    </button>
   </div>
   }
-
-  @if (successMessage()) {
-  <p>{{ successMessage() }}</p>
-  } @else if (errorMessage()) {
-  <p>{{ errorMessage() }}</p>
+  @if (status()[1]) {
+  <p>{{ status()[1] }}</p>
+  } @else if (status()[2]) {
+  <p>{{ status()[2] }}</p>
   }
 </nav>
 

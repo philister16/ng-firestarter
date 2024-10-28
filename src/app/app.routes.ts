@@ -11,7 +11,7 @@ export const routes: Routes = [
     redirectTo: 'home'
   },
 
-  // Unguarded routes
+  // Unauthenticated routes
   {
     path: 'auth',
     loadComponent: () => import('./auth/auth/auth.component').then(m => m.AuthComponent),
@@ -44,12 +44,15 @@ export const routes: Routes = [
     ]
   },
 
-  // Guarded routes
+  // Authenticated routes
   {
     path: '',
     canActivate: [authGuard],
     canActivateChild: [authGuard],
     loadComponent: () => import('./nav/nav.component').then(m => m.NavComponent),
+    resolve: {
+      userAccount: accountResolver,
+    },
     children: [
       {
         path: 'home',
@@ -58,13 +61,11 @@ export const routes: Routes = [
       {
         path: 'account',
         loadComponent: () => import('./account/account.component').then(m => m.AccountComponent),
-        resolve: {
-          userAccount: accountResolver,
-        }
       }
     ]
   },
 
+  // Unauthenticated utility routes
 
   // Unauthorized
   {

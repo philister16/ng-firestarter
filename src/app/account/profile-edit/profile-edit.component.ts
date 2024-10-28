@@ -12,7 +12,7 @@ import { DbStatus } from '../../core/interfaces';
   styleUrl: './profile-edit.component.css'
 })
 export class ProfileEditComponent implements OnInit {
-  account = input<UserAccount | null>();
+  account = input<Partial<UserAccount> | null>();
   dbStatus = input<DbStatus>([false, '', '']);
   onUpdate = output<Partial<UserAccount>>();
   nameHasChanged = signal(false);
@@ -21,17 +21,16 @@ export class ProfileEditComponent implements OnInit {
 
   ngOnInit(): void {
     this.nameForm = this.fb.nonNullable.group({
-      displayName: [this.account()?.displayName, [Validators.minLength(3), Validators.maxLength(32)]]
+      firstName: [this.account()?.firstName, [Validators.minLength(3), Validators.maxLength(64)]],
+      lastName: [this.account()?.lastName, [Validators.minLength(3), Validators.maxLength(64)]]
     });
   }
 
-  // Add methods for updating profile
   saveName() {
     if (this.nameForm.invalid) {
       return;
     }
-    const { displayName } = this.nameForm.value;
-    this.onUpdate.emit({ displayName });
+    this.onUpdate.emit(this.nameForm.value);
     this.nameHasChanged.set(false);
   }
 }

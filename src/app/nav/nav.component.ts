@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { DbStatus } from '../core/interfaces';
+
 
 @Component({
   selector: 'app-nav',
@@ -12,8 +14,8 @@ import { AuthService } from '../auth/auth.service';
 export class NavComponent {
   private authService = inject(AuthService);
   readonly user = this.authService.user;
-  successMessage = signal('');
-  errorMessage = signal('');
+  status = signal<DbStatus>([false, '', '']);
+
 
   async logout() {
     try {
@@ -25,10 +27,11 @@ export class NavComponent {
 
   async resendEmailVerification() {
     try {
+      this.status.set([true, '', '']);
       await this.authService.resendEmailVerification();
-      this.successMessage.set('Email verification sent. Please check your email.');
+      this.status.set([false, '', 'Email verification sent. Please check your email.']);
     } catch (error) {
-      this.errorMessage.set('Error sending email verification.');
+      this.status.set([false, 'Error sending email verification.', '']);
     }
   }
 }

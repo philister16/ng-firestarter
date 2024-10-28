@@ -6,16 +6,16 @@
 } @else {
 <p>{{ dbStatus()[2] }}</p>
 }
-<app-profile-edit [account]="account()" (onUpdate)="updateAccount($event)" [dbStatus]="dbStatus()"></app-profile-edit>
+<app-profile-edit [account]="account()" [dbStatus]="dbStatus()" (onUpdate)="updateAccount($event)"></app-profile-edit>
 <hr>
-<h2>Profile picture</h2>
-<app-avatar-edit [account]="account()" (onUpdate)="updateAccount($event)" [dbStatus]="dbStatus()"></app-avatar-edit>
+
+<app-avatar-edit [user]="user()" (onUpdate)="updateAccount($event)" [dbStatus]="dbStatus()"></app-avatar-edit>
 <hr>
 <h2>Email</h2>
 <!-- <app-change-email [email]="account()?.email"></app-change-email> -->
 <hr>
 <h2>Password</h2>
-<app-change-password></app-change-password>
+<!-- <app-change-password></app-change-password> -->
 <hr>
 <h2>Contact</h2>
 <p>contact</p>

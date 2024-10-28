@@ -1,11 +1,20 @@
 <h2>Profile</h2>
 <div>
   <form [formGroup]="nameForm" (ngSubmit)="saveName()">
-    <label for="displayName">Name:</label>
-    <input id="displayName" formControlName="displayName" (ngModelChange)="nameHasChanged.set(true)" />
-    @if (nameForm.invalid && nameForm.touched) {
-    <p *ngIf="nameForm.get('displayName')?.errors?.['minlength']">Name must be between 6 and 32 characters</p>
-    }
+    <div>
+      <label for="firstName">First name:</label>
+      <input id="firstName" formControlName="firstName" (ngModelChange)="nameHasChanged.set(true)" />
+      @if (nameForm.invalid && nameForm.touched) {
+      <p *ngIf="nameForm.get('firstName')?.errors?.['minlength']">First name must be between 3 and 64 characters</p>
+      }
+    </div>
+    <div>
+      <label for="lastName">Last name:</label>
+      <input id="lastName" formControlName="lastName" (ngModelChange)="nameHasChanged.set(true)" />
+      @if (nameForm.invalid && nameForm.touched) {
+      <p *ngIf="nameForm.get('lastName')?.errors?.['minlength']">Last name must be between 3 and 64 characters</p>
+      }
+    </div>
     <button [disabled]="!nameHasChanged() || dbStatus()[0]" type="submit">{{ dbStatus()[0] ? 'Saving...' : 'Save'
       }}</button>
   </form>

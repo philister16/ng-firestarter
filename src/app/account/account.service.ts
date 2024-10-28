@@ -1,14 +1,17 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Firestore, doc, updateDoc, getDoc, deleteDoc, setDoc } from '@angular/fire/firestore';
-import { User } from '@angular/fire/auth';
 import { FirebaseError } from 'firebase/app';
 
 export interface UserAccount {
-  uid?: string;
-  email?: string;
-  emailVerified?: boolean;
-  displayName?: string;
-  photoURL?: string;
+  roles?: string[];
+  firstName?: string | null;
+  lastName?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  country?: string | null;
+  profilePicture?: string | null;
 }
 
 @Injectable({
@@ -21,26 +24,25 @@ export class AccountService {
 
   constructor() { }
 
-  async createAccount(user: User, accountData: Partial<UserAccount>): Promise<void> {
+  async createAccount(userId: string, accountData: Partial<UserAccount>): Promise<void> {
     try {
-      if (!user) {
+      if (!userId) {
         throw new Error('No user provided');
       }
       // save in DB
-      const userRef = doc(this.firestore, `users/${user.uid}`);
+      const userRef = doc(this.firestore, `users/${userId}`);
       await setDoc(userRef, accountData);
       // set local signal
-      const userData = this.prepareUserData(user);
-      this.accountSignal.set({ ...userData, ...accountData });
+      this.accountSignal.set(accountData);
     } catch (error: any) {
       this.handleError(error);
     }
   }
 
-  async updateAccount(uid: string, accountUpdate: Partial<UserAccount>): Promise<void> {
+  async updateAccount(userId: string, accountUpdate: Partial<UserAccount>): Promise<void> {
     try {
       // Update in DB and reflect in local signal
-      const userRef = doc(this.firestore, `users/${uid}`);
+      const userRef = doc(this.firestore, `users/${userId}`);
       await updateDoc(userRef, accountUpdate);
       this.accountSignal.update(account => ({ ...account, ...accountUpdate } as UserAccount));
     } catch (error: any) {
@@ -48,22 +50,19 @@ export class AccountService {
     }
   }
 
-  async getAccount(user: User): Promise<Partial<UserAccount> | null> {
+  async getAccount(userId: string): Promise<Partial<UserAccount> | null> {
     try {
-      if (!user) {
+      if (!userId) {
         throw new Error('No user provided');
       }
       // get from DB
-      const userRef = doc(this.firestore, `users/${user.uid}`);
+      const userRef = doc(this.firestore, `users/${userId}`);
       const userSnapshot = await getDoc(userRef);
 
       if (userSnapshot.exists()) {
-        // Convert the document data to UserAccount type
         const accountData = userSnapshot.data() as Partial<UserAccount>;
-        // set local signal
-        const userData = this.prepareUserData(user);
-        this.accountSignal.set({ ...userData, ...accountData });
-        return { ...userData, ...accountData };
+        this.accountSignal.set(accountData);
+        return accountData;
       } else {
         console.log('No user found with the given UID');
         return null;
@@ -73,10 +72,10 @@ export class AccountService {
     }
   }
 
-  async deleteAccount(uid: string): Promise<void> {
+  async deleteAccount(userId: string): Promise<void> {
     try {
       // delete from DB and null local signal
-      const userRef = doc(this.firestore, `users/${uid}`);
+      const userRef = doc(this.firestore, `users/${userId}`);
       await deleteDoc(userRef);
       this.accountSignal.set(null);
     } catch (error: any) {
@@ -84,23 +83,11 @@ export class AccountService {
     }
   }
 
-  /**
-   * Patch user data on account
-   * @dev for use in auth service only!
-   * @param user
-   */
-  patchUserDataOnAccount(user: User | null): void {
-    if (!user || null) {
-      this.accountSignal.set(null);
-      return;
-    }
-    this.accountSignal.update(account => ({ ...account, ...this.prepareUserData(user) } as UserAccount));
+  clearAccount(): void {
+    this.accountSignal.set(null);
   }
 
-  private prepareUserData(user: User): { email: string, emailVerified: boolean, uid: string } {
-    const { email, emailVerified, uid } = user;
-    return { email: email ?? '', emailVerified: emailVerified ?? false, uid: uid ?? '' };
-  }
+  /// TODO: handle errors in an error service
 
   private handleError(error: any): never {
     if (error instanceof FirebaseError) {

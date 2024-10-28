@@ -1,8 +1,8 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
-import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, updateProfile, User } from '@angular/fire/auth';
+import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, updateProfile, User, UserProfile } from '@angular/fire/auth';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { FirebaseError } from 'firebase/app';
-import { AccountService } from '../account/account.service';
+import { AccountService, UserAccount } from '../account/account.service';
 
 export enum AuthState {
   UNAUTHENTICATED,
@@ -28,6 +28,11 @@ export interface ActionResult {
   message: string;
 }
 
+export interface UserData {
+  auth: User;
+  account?: UserAccount;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -37,20 +42,29 @@ export class AuthService {
   private userSignal = signal<User | null>(null);
   private authErrorSignal = signal<string | null>(null);
 
-  readonly user = computed(() => this.userSignal());
-  readonly userData = computed(() => {
-    if (this.user()) {
-      const { email, emailVerified, uid } = this.user()!;
-      return { email, emailVerified, uid };
+  /**
+   * Returns the current user and their account data
+   */
+  readonly user = computed<UserData | null>(() => {
+    if (this.userSignal()) {
+      return { auth: this.userSignal(), account: this.accountService.account() } as UserData;
     }
     return null;
   });
+
+  /**
+   * Returns the current authentication error
+   */
   readonly authError = computed(() => this.authErrorSignal());
 
   constructor() {
     onAuthStateChanged(this.auth, (user) => {
       this.userSignal.set(user);
-      this.accountService.patchUserDataOnAccount(user);
+      /// @DEV: account is fetched from firestore by the account resolver on the root route
+      if (!user) {
+        // clear account if user is not logged in
+        this.accountService.clearAccount();
+      }
     });
   }
 
@@ -58,7 +72,7 @@ export class AuthService {
     try {
       const { user } = await createUserWithEmailAndPassword(this.auth, email, password);
       await sendEmailVerification(user);
-      await this.accountService.createAccount(user, {});
+      await this.accountService.createAccount(user.uid, {});
       return user;
     } catch (error) {
       this.handleAuthenticationError(error as FirebaseError);
@@ -160,6 +174,12 @@ export class AuthService {
     } catch (error) {
       throw error;
     }
+  }
+
+  private patchUserSignal(user: Partial<User>) {
+    this.userSignal.update((currentUser) => {
+      return { ...currentUser, ...user } as User;
+    });
   }
 
   private handleAuthenticationError(error: FirebaseError) {
