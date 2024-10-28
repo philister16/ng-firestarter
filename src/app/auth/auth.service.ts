@@ -1,8 +1,9 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
-import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, User, verifyBeforeUpdateEmail } from '@angular/fire/auth';
+import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, User, verifyBeforeUpdateEmail, deleteUser } from '@angular/fire/auth';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { FirebaseError } from 'firebase/app';
 import { AccountService, UserAccount } from '../account/account.service';
+import { StorageService } from '../core/storage.service';
 
 export enum AuthState {
   UNAUTHENTICATED,
@@ -39,6 +40,7 @@ export interface UserData {
 export class AuthService {
   private auth = inject(Auth);
   private accountService = inject(AccountService);
+  private storageService = inject(StorageService);
   private userSignal = signal<User | null>(null);
   private authErrorSignal = signal<string | null>(null);
 
@@ -179,6 +181,22 @@ export class AuthService {
       }
       await reauthenticateWithCredential(this.auth.currentUser, EmailAuthProvider.credential(this.auth.currentUser.email ?? '', password));
       await verifyBeforeUpdateEmail(this.auth.currentUser, newEmail);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteUser(password: string): Promise<void> {
+    try {
+      if (!this.auth.currentUser) {
+        throw new Error('No user is currently signed in.');
+      }
+      const { uid, email } = this.auth.currentUser;
+      await reauthenticateWithCredential(this.auth.currentUser, EmailAuthProvider.credential(email ?? '', password));
+      await this.storageService.purgeUserFiles(uid);
+      await this.accountService.deleteAccount(uid);
+      await deleteUser(this.auth.currentUser);
+      await signOut(this.auth);
     } catch (error) {
       throw error;
     }

@@ -119,4 +119,13 @@ export class StorageService {
       img.onerror = (error) => reject(error);
     });
   }
+
+  async purgeUserFiles(uid: string): Promise<void> {
+    const avatarRef = ref(this.storage, `avatar/${uid}`);
+    try {
+      await deleteObject(avatarRef);
+    } catch (error) {
+      throw error;
+    }
+  }
 }

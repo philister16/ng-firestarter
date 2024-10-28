@@ -1,0 +1,28 @@
+<h2>Delete Account</h2>
+<p>This action is irreversible and will delete your account and all associated data.</p>
+<form [formGroup]="deleteUserForm" (ngSubmit)="onSubmit()">
+  <div>
+    <label for="password">Password</label>
+    <input type="password" id="password" formControlName="password" />
+    @if (deleteUserForm.get('password')?.invalid && deleteUserForm.get('password')?.touched) {
+    <small>Password is required</small>
+    }
+  </div>
+  <div>
+    <label for="confirmation">Confirm</label>
+    <input type="checkbox" id="confirmation" formControlName="confirmation" />
+    @if (deleteUserForm.get('confirmation')?.invalid && deleteUserForm.get('confirmation')?.touched) {
+    <small>Confirmation is required</small>
+    }
+  </div>
+  <button type="submit" [disabled]="deleteUserForm.invalid || dbStatus()[0]">
+    {{ dbStatus()[0] ? 'Deleting...' : 'Delete Account' }}
+  </button>
+</form>
+@if (dbStatus()[0]) {
+<p>Deleting...</p>
+} @else if (dbStatus()[1]) {
+<p>{{ dbStatus()[1] }}</p>
+} @else if (dbStatus()[2]) {
+<p>{{ dbStatus()[2] }}</p>
+}

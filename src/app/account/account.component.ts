@@ -6,10 +6,11 @@ import { AvatarEditComponent } from './avatar-edit/avatar-edit.component';
 import { AccountService, UserAccount } from './account.service';
 import { DbStatus } from '../core/interfaces';
 import { AuthService } from '../auth/auth.service';
+import { DeleteUserComponent } from './delete-user/delete-user.component';
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [ProfileEditComponent, AvatarEditComponent, ChangeEmailComponent, ChangePasswordComponent],
+  imports: [ProfileEditComponent, AvatarEditComponent, ChangeEmailComponent, ChangePasswordComponent, DeleteUserComponent],
   templateUrl: './account.component.html',
   styleUrl: './account.component.css'
 })
