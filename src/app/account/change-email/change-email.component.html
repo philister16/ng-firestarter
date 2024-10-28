@@ -6,10 +6,17 @@
     <div>
       <label for="newEmail">New Email:</label>
       <input type="email" id="newEmail" formControlName="newEmail">
+      @if (changeEmailForm.get('newEmail')?.invalid && changeEmailForm.get('newEmail')?.touched) {
+      <small *ngIf="changeEmailForm.get('newEmail')?.errors?.['required']">Email is required.</small>
+      <small *ngIf="changeEmailForm.get('newEmail')?.errors?.['email']">Invalid email address.</small>
+      }
     </div>
     <div>
       <label for="password">Password:</label>
       <input type="password" id="password" formControlName="password">
+      @if (changeEmailForm.get('password')?.invalid && changeEmailForm.get('password')?.touched) {
+      <small *ngIf="changeEmailForm.get('password')?.errors?.['required']">Password is required.</small>
+      }
     </div>
     <button type="submit" [disabled]="!changeEmailForm.valid || dbStatus()[0]">
       {{ dbStatus()[0] ? 'Working...' : 'Update Email' }}

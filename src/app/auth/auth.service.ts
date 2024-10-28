@@ -1,5 +1,5 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
-import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, updateProfile, User, UserProfile, verifyBeforeUpdateEmail } from '@angular/fire/auth';
+import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, User, verifyBeforeUpdateEmail } from '@angular/fire/auth';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { FirebaseError } from 'firebase/app';
 import { AccountService, UserAccount } from '../account/account.service';
@@ -105,6 +105,19 @@ export class AuthService {
         throw new Error('Invalid parameters');
       }
       await confirmPasswordReset(this.auth, oobCode, newPassword);
+    } catch (error) {
+      this.handleAuthenticationError(error as FirebaseError);
+      throw error;
+    }
+  }
+
+  async updatePassword(oldPassword: string, newPassword: string): Promise<void> {
+    try {
+      if (!this.auth.currentUser) {
+        throw new Error('No user is currently signed in.');
+      }
+      await reauthenticateWithCredential(this.auth.currentUser, EmailAuthProvider.credential(this.auth.currentUser.email ?? '', oldPassword));
+      await updatePassword(this.auth.currentUser, newPassword);
     } catch (error) {
       this.handleAuthenticationError(error as FirebaseError);
       throw error;

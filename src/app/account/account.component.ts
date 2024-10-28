@@ -9,7 +9,7 @@ import { AuthService } from '../auth/auth.service';
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [ProfileEditComponent, AvatarEditComponent, ChangeEmailComponent],
+  imports: [ProfileEditComponent, AvatarEditComponent, ChangeEmailComponent, ChangePasswordComponent],
   templateUrl: './account.component.html',
   styleUrl: './account.component.css'
 })
