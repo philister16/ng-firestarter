@@ -1,5 +1,5 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
-import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, User, verifyBeforeUpdateEmail, deleteUser } from '@angular/fire/auth';
+import { applyActionCode, confirmPasswordReset, createUserWithEmailAndPassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword, User, verifyBeforeUpdateEmail, deleteUser, signInWithPopup, GoogleAuthProvider, OAuthProvider } from '@angular/fire/auth';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { FirebaseError } from 'firebase/app';
 import { AccountService, UserAccount } from '../account/account.service';
@@ -21,6 +21,12 @@ export enum ActionMode {
   RECOVER_EMAIL = 'recoverEmail',
   VERIFY_AND_CHANGE_EMAIL = 'verifyAndChangeEmail',
   RESET_PASSWORD = 'resetPassword'
+}
+
+export enum AuthProvider {
+  GOOGLE = 'google',
+  FACEBOOK = 'facebook',
+  APPLE = 'apple'
 }
 
 export interface ActionResult {
@@ -273,10 +279,58 @@ export class AuthService {
       case 'auth/invalid-action-code':
         this.authErrorSignal.set('Invalid action code.');
         break;
+      case 'auth/popup-closed-by-user':
+        this.authErrorSignal.set('Sign in was cancelled.');
+        break;
+      case 'auth/popup-blocked':
+        this.authErrorSignal.set('Sign in popup was blocked. Please allow popups for this website.');
+        break;
+      case 'auth/cancelled-popup-request':
+        this.authErrorSignal.set('Only one sign in window can be open at a time.');
+        break;
+      case 'auth/provider-already-linked':
+        this.authErrorSignal.set('Account is already linked with another provider.');
+        break;
       default:
         this.authErrorSignal.set(error.message || 'An unknown authentication error occurred.');
     }
     // Log the error for debugging purposes
     console.error('Authentication error:', error);
+  }
+
+  async signInWithProvider(providerType: AuthProvider): Promise<User | null> {
+    try {
+      let provider;
+      switch (providerType) {
+        case AuthProvider.GOOGLE:
+          provider = new GoogleAuthProvider();
+          break;
+        case AuthProvider.FACEBOOK:
+          // provider = new FacebookAuthProvider();
+          throw new Error('Facebook authentication not implemented yet');
+        case AuthProvider.APPLE:
+          // provider = new OAuthProvider('apple.com');
+          throw new Error('Apple authentication not implemented yet');
+        default:
+          throw new Error('Invalid provider type');
+      }
+
+      const { user } = await signInWithPopup(this.auth, provider);
+
+      // Create or update account in Firestore
+      const accountExists = await this.accountService.getAccount(user.uid);
+      if (!accountExists) {
+        await this.accountService.createAccount(user.uid, {
+          firstName: user.displayName?.split(' ')[0] || null,
+          lastName: user.displayName?.split(' ').slice(1).join(' ') || null,
+          profilePicture: user.photoURL || null
+        });
+      }
+
+      return user;
+    } catch (error) {
+      this.handleAuthenticationError(error as FirebaseError);
+      throw error;
+    }
   }
 }
