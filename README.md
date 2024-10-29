@@ -1,6 +1,32 @@
 # NgFirestarter
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.4.
+This project is a simple Angular application that uses Firebase for authentication, Firestore for a database, and Storage for file uploads. It is a starting point for building a web app that needs to authenticate users and store data. It is barebones and unstyled by default and on purpose.
+
+## Getting Started
+
+1. Clone the repo
+2. Run `npm install` to install the dependencies
+3. Copy the `.env.example` file to `.env.ts` and populate the values to match your Firebase project
+4. Update `.firebaserc` to match your project
+5. Run `ng serve` to start the development server
+
+## Firebase
+
+This project uses Firebase for authentication, Firestore for a database, and Storage for file uploads. If you don't have a Firebase project, you can create one at [Firebase Console](https://console.firebase.google.com/).
+
+Make sure to deploy the firestore and storage rules before starting the app. The easiest way to do this is to use firebase-tools CLI.
+
+Install firebase-tools if you haven't already:
+
+```bash
+npm install -g firebase-tools
+```
+
+Then deploy the firestore and storage rules:
+
+```bash
+firebase deploy --only firestore,storage
+```
 
 ## Development server
 
