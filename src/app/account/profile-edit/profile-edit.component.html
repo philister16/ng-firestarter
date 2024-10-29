@@ -4,15 +4,17 @@
     <div>
       <label for="firstName">First name:</label>
       <input id="firstName" formControlName="firstName" (ngModelChange)="nameHasChanged.set(true)" />
-      @if (nameForm.invalid && nameForm.touched) {
-      <p *ngIf="nameForm.get('firstName')?.errors?.['minlength']">First name must be between 3 and 64 characters</p>
+      @if (nameForm.get('firstName')?.invalid && nameForm.get('firstName')?.touched) {
+      <small *ngIf="nameForm.get('firstName')?.errors?.['minlength']">First name must be between 3 and 64
+        characters</small>
       }
     </div>
     <div>
       <label for="lastName">Last name:</label>
       <input id="lastName" formControlName="lastName" (ngModelChange)="nameHasChanged.set(true)" />
       @if (nameForm.invalid && nameForm.touched) {
-      <p *ngIf="nameForm.get('lastName')?.errors?.['minlength']">Last name must be between 3 and 64 characters</p>
+      <small *ngIf="nameForm.get('lastName')?.errors?.['minlength']">Last name must be between 3 and 64
+        characters</small>
       }
     </div>
     <button [disabled]="!nameHasChanged() || dbStatus()[0]" type="submit">{{ dbStatus()[0] ? 'Saving...' : 'Save'

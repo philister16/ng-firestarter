@@ -33,7 +33,7 @@ export class ResetPasswordComponent implements OnInit {
       this.isLoading.set(true);
       const { password } = this.resetPasswordForm.value;
       await this.authService.resetPassword(this.oobCode!, password!);
-      this.router.navigate(['/login']);
+      this.router.navigate(['auth', 'login']);
     } catch (error) {
       // handled by auth service
       return;
