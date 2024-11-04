@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,12 +9,13 @@ import { ActionMode, AuthService, ActionResult } from '../auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './action.component.html',
-  styleUrl: './action.component.css'
+  styleUrls: ['./action.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ActionComponent implements OnInit {
-  isWorking = signal(false);
-  errorMessage = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
+  isWorking = false;
+  errorMessage = '';
+  successMessage = '';
   mode: ActionMode | null = null;
   oobCode: string | null = null;
 
@@ -27,7 +28,7 @@ export class ActionComponent implements OnInit {
     this.oobCode = this.route.snapshot.queryParamMap.get('oobCode');
 
     if (!this.mode || !this.oobCode) {
-      this.errorMessage.set('No action parameters.');
+      this.errorMessage = 'No action parameters.';
       return;
     }
 
@@ -39,7 +40,7 @@ export class ActionComponent implements OnInit {
   }
 
   async handle(): Promise<void> {
-    this.isWorking.set(true);
+    this.isWorking = true;
     try {
       const result: ActionResult = await this.authService.handleAction(this.mode, this.oobCode);
       if (!result.success) {
@@ -51,26 +52,18 @@ export class ActionComponent implements OnInit {
           break;
         case ActionMode.RECOVER_EMAIL:
           this.authService.signOut();
-          this.successMessage.set(result.message);
+          this.successMessage = result.message;
           break;
         case ActionMode.VERIFY_AND_CHANGE_EMAIL:
           this.authService.signOut();
-          this.successMessage.set(result.message);
+          this.successMessage = result.message;
           break;
-        default:
-          this.successMessage.set(result.message);
       }
     } catch (error: any) {
-      switch (error.code) {
-        case 'auth/invalid-action-code':
-          this.errorMessage.set('Invalid action code.');
-          break;
-        default:
-          this.errorMessage.set(error.message);
-      }
-      console.error(error);
+      this.errorMessage = error.message;
+      this.successMessage = '';
     } finally {
-      this.isWorking.set(false);
+      this.isWorking = false;
     }
   }
 
