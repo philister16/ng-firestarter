@@ -89,8 +89,7 @@ export class AuthService {
       await this.accountService.createAccount(user.uid, {});
       return user;
     } catch (error) {
-      this.handleAuthError(error as FirebaseError);
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
   }
 
@@ -107,8 +106,7 @@ export class AuthService {
     try {
       await sendPasswordResetEmail(this.auth, email);
     } catch (error) {
-      this.handleAuthError(error as FirebaseError);
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
   }
 
@@ -119,8 +117,7 @@ export class AuthService {
       }
       await confirmPasswordReset(this.auth, oobCode, newPassword);
     } catch (error) {
-      this.handleAuthError(error as FirebaseError);
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
   }
 
@@ -132,8 +129,7 @@ export class AuthService {
       await reauthenticateWithCredential(this.auth.currentUser, EmailAuthProvider.credential(this.auth.currentUser.email ?? '', oldPassword));
       await updatePassword(this.auth.currentUser, newPassword);
     } catch (error) {
-      this.handleAuthError(error as FirebaseError);
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
   }
 
@@ -141,8 +137,7 @@ export class AuthService {
     try {
       await signOut(this.auth);
     } catch (error) {
-      this.handleAuthError(error as FirebaseError);
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
   }
 
@@ -170,7 +165,7 @@ export class AuthService {
       }
       return result;
     } catch (error) {
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
   }
 
@@ -181,7 +176,7 @@ export class AuthService {
       }
       await sendEmailVerification(this.auth.currentUser);
     } catch (error) {
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
   }
 
@@ -193,7 +188,7 @@ export class AuthService {
       await reauthenticateWithCredential(this.auth.currentUser, EmailAuthProvider.credential(this.auth.currentUser.email ?? '', password));
       await verifyBeforeUpdateEmail(this.auth.currentUser, newEmail);
     } catch (error) {
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
   }
 
@@ -209,7 +204,7 @@ export class AuthService {
       await deleteUser(this.auth.currentUser);
       await signOut(this.auth);
     } catch (error) {
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
   }
 
@@ -225,14 +220,8 @@ export class AuthService {
         return AuthState.UNAUTHENTICATED;
       }
     } catch (error) {
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
-  }
-
-  handleAuthError(error: FirebaseError): AuthError {
-    const authError = new AuthError(this.getErrorMessage(error), error.code);
-    this.authErrorSignal.set(authError);
-    return authError;
   }
 
   async signInWithProvider(providerType: AuthProvider): Promise<User | null> {
@@ -266,9 +255,14 @@ export class AuthService {
 
       return user;
     } catch (error) {
-      this.handleAuthError(error as FirebaseError);
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
+  }
+
+  private handleAuthError(error: FirebaseError): AuthError {
+    const authError = new AuthError(this.getErrorMessage(error), error.code);
+    this.authErrorSignal.set(authError);
+    return authError;
   }
 
   private async reloadCurrentUser(): Promise<void> {

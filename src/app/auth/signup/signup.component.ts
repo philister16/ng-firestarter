@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
@@ -8,14 +8,15 @@ import { AuthService } from '../auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.css']
+  styleUrls: ['./signup.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SignupComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
-  isLoading = signal(false);
-  successMessage = signal('');
-  errorMessage = signal('');
+  isLoading = false;
+  errorMessage = '';
+  successMessage = '';
 
   signupForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -25,14 +26,16 @@ export class SignupComponent {
   async onSubmit() {
     if (this.signupForm.invalid) return;
     try {
-      this.isLoading.set(true);
+      this.isLoading = true;
       const { email, password } = this.signupForm.value;
       await this.authService.signUpWithEmailAndPassword(email!, password!);
-      this.successMessage.set('Account created successfully. Please check your email for verification and login.');
-    } catch (err) {
-      // handled by service
+      this.successMessage = 'Account created successfully. Please check your email for verification and login.';
+      this.errorMessage = '';
+    } catch (err: any) {
+      this.errorMessage = err.message;
+      this.successMessage = '';
     } finally {
-      this.isLoading.set(false);
+      this.isLoading = false;
       this.signupForm.reset();
     }
   }
