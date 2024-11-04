@@ -40,6 +40,12 @@ export interface UserData {
   account?: UserAccount;
 }
 
+export class AuthError extends Error {
+  constructor(message: string, public code: string) {
+    super(message);
+  }
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -48,7 +54,7 @@ export class AuthService {
   private accountService = inject(AccountService);
   private storageService = inject(StorageService);
   private userSignal = signal<User | null>(null);
-  private authErrorSignal = signal<string | null>(null);
+  private authErrorSignal = signal<AuthError | null>(null);
 
   /**
    * Returns the current user and their account data
@@ -83,7 +89,7 @@ export class AuthService {
       await this.accountService.createAccount(user.uid, {});
       return user;
     } catch (error) {
-      this.handleAuthenticationError(error as FirebaseError);
+      this.handleAuthError(error as FirebaseError);
       throw error;
     }
   }
@@ -93,8 +99,7 @@ export class AuthService {
       const { user } = await signInWithEmailAndPassword(this.auth, email, password);
       return user;
     } catch (error) {
-      this.handleAuthenticationError(error as FirebaseError);
-      throw error;
+      throw this.handleAuthError(error as FirebaseError);
     }
   }
 
@@ -102,7 +107,7 @@ export class AuthService {
     try {
       await sendPasswordResetEmail(this.auth, email);
     } catch (error) {
-      this.handleAuthenticationError(error as FirebaseError);
+      this.handleAuthError(error as FirebaseError);
       throw error;
     }
   }
@@ -114,7 +119,7 @@ export class AuthService {
       }
       await confirmPasswordReset(this.auth, oobCode, newPassword);
     } catch (error) {
-      this.handleAuthenticationError(error as FirebaseError);
+      this.handleAuthError(error as FirebaseError);
       throw error;
     }
   }
@@ -127,7 +132,7 @@ export class AuthService {
       await reauthenticateWithCredential(this.auth.currentUser, EmailAuthProvider.credential(this.auth.currentUser.email ?? '', oldPassword));
       await updatePassword(this.auth.currentUser, newPassword);
     } catch (error) {
-      this.handleAuthenticationError(error as FirebaseError);
+      this.handleAuthError(error as FirebaseError);
       throw error;
     }
   }
@@ -136,7 +141,7 @@ export class AuthService {
     try {
       await signOut(this.auth);
     } catch (error) {
-      this.handleAuthenticationError(error as FirebaseError);
+      this.handleAuthError(error as FirebaseError);
       throw error;
     }
   }
@@ -224,78 +229,10 @@ export class AuthService {
     }
   }
 
-  private async reloadCurrentUser(): Promise<void> {
-    if (!this.auth.currentUser) {
-      throw new Error('No user is currently signed in.');
-    }
-    await this.auth.currentUser.reload();
-    this.userSignal.set(this.auth.currentUser);
-  }
-
-  private patchUserSignal(user: Partial<User>) {
-    this.userSignal.update((currentUser) => {
-      return { ...currentUser, ...user } as User;
-    });
-  }
-
-  private handleAuthenticationError(error: FirebaseError) {
-    switch (error.code) {
-      case 'auth/invalid-credential':
-        this.authErrorSignal.set('Invalid credentials.');
-        break;
-      case 'auth/invalid-email':
-        this.authErrorSignal.set('Invalid email address.');
-        break;
-      case 'auth/user-disabled':
-        this.authErrorSignal.set('This user account has been disabled.');
-        break;
-      case 'auth/user-not-found':
-        this.authErrorSignal.set('No user found with this email.');
-        break;
-      case 'auth/wrong-password':
-        this.authErrorSignal.set('Incorrect password.');
-        break;
-      case 'auth/email-already-in-use':
-        this.authErrorSignal.set('Email is already in use.');
-        break;
-      case 'auth/weak-password':
-        this.authErrorSignal.set('Password is too weak.');
-        break;
-      case 'auth/operation-not-allowed':
-        this.authErrorSignal.set('Operation not allowed.');
-        break;
-      case 'auth/account-exists-with-different-credential':
-        this.authErrorSignal.set('An account already exists with the same email address but different sign-in credentials.');
-        break;
-      case 'auth/requires-recent-login':
-        this.authErrorSignal.set('This operation is sensitive and requires recent authentication. Log in again before retrying.');
-        break;
-      case 'auth/too-many-requests':
-        this.authErrorSignal.set('Access to this account has been temporarily disabled due to many failed login attempts. Try again later.');
-        break;
-      case 'auth/network-request-failed':
-        this.authErrorSignal.set('A network error occurred. Please check your connection and try again.');
-        break;
-      case 'auth/invalid-action-code':
-        this.authErrorSignal.set('Invalid action code.');
-        break;
-      case 'auth/popup-closed-by-user':
-        this.authErrorSignal.set('Sign in was cancelled.');
-        break;
-      case 'auth/popup-blocked':
-        this.authErrorSignal.set('Sign in popup was blocked. Please allow popups for this website.');
-        break;
-      case 'auth/cancelled-popup-request':
-        this.authErrorSignal.set('Only one sign in window can be open at a time.');
-        break;
-      case 'auth/provider-already-linked':
-        this.authErrorSignal.set('Account is already linked with another provider.');
-        break;
-      default:
-        this.authErrorSignal.set(error.message || 'An unknown authentication error occurred.');
-    }
-    // Log the error for debugging purposes
-    console.error('Authentication error:', error);
+  handleAuthError(error: FirebaseError): AuthError {
+    const authError = new AuthError(this.getErrorMessage(error), error.code);
+    this.authErrorSignal.set(authError);
+    return authError;
   }
 
   async signInWithProvider(providerType: AuthProvider): Promise<User | null> {
@@ -329,8 +266,82 @@ export class AuthService {
 
       return user;
     } catch (error) {
-      this.handleAuthenticationError(error as FirebaseError);
+      this.handleAuthError(error as FirebaseError);
       throw error;
     }
+  }
+
+  private async reloadCurrentUser(): Promise<void> {
+    if (!this.auth.currentUser) {
+      throw new Error('No user is currently signed in.');
+    }
+    await this.auth.currentUser.reload();
+    this.userSignal.set(this.auth.currentUser);
+  }
+
+  private patchUserSignal(user: Partial<User>) {
+    this.userSignal.update((currentUser) => {
+      return { ...currentUser, ...user } as User;
+    });
+  }
+
+  private getErrorMessage(error: FirebaseError): string {
+    let userMessage: string;
+    switch (error.code) {
+      case 'auth/invalid-credential':
+        userMessage = 'Invalid credentials.';
+        break;
+      case 'auth/invalid-email':
+        userMessage = 'Invalid email address.';
+        break;
+      case 'auth/user-disabled':
+        userMessage = 'This user account has been disabled.';
+        break;
+      case 'auth/user-not-found':
+        userMessage = 'No user found with this email.';
+        break;
+      case 'auth/wrong-password':
+        userMessage = 'Incorrect password.';
+        break;
+      case 'auth/email-already-in-use':
+        userMessage = 'Email is already in use.';
+        break;
+      case 'auth/weak-password':
+        userMessage = 'Password is too weak.';
+        break;
+      case 'auth/operation-not-allowed':
+        userMessage = 'Operation not allowed.';
+        break;
+      case 'auth/account-exists-with-different-credential':
+        userMessage = 'An account already exists with the same email address but different sign-in credentials.';
+        break;
+      case 'auth/requires-recent-login':
+        userMessage = 'This operation is sensitive and requires recent authentication. Log in again before retrying.';
+        break;
+      case 'auth/too-many-requests':
+        userMessage = 'Access to this account has been temporarily disabled due to many failed login attempts. Try again later.';
+        break;
+      case 'auth/network-request-failed':
+        userMessage = 'A network error occurred. Please check your connection and try again.';
+        break;
+      case 'auth/invalid-action-code':
+        userMessage = 'Invalid action code.';
+        break;
+      case 'auth/popup-closed-by-user':
+        userMessage = 'Sign in was cancelled.';
+        break;
+      case 'auth/popup-blocked':
+        userMessage = 'Sign in popup was blocked. Please allow popups for this website.';
+        break;
+      case 'auth/cancelled-popup-request':
+        userMessage = 'Only one sign in window can be open at a time.';
+        break;
+      case 'auth/provider-already-linked':
+        userMessage = 'Account is already linked with another provider.';
+        break;
+      default:
+        userMessage = error.message || 'An unknown authentication error occurred.';
+    }
+    return userMessage;
   }
 }

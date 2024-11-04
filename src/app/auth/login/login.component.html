@@ -1,4 +1,5 @@
 <h2>Login</h2>
+<p *ngIf="errorMessage">{{ errorMessage }}</p>
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
   <div>
     <label for="email">Email:</label>
@@ -15,6 +16,6 @@
       <small *ngIf="loginForm.get('password')?.errors?.['required']">Password is required.</small>
     </div>
   </div>
-  <button type="submit" [disabled]="loginForm.invalid || isLoading()">{{ isLoading() ? 'Login in...' : 'Login'
+  <button type="submit" [disabled]="loginForm.invalid || isLoading">{{ isLoading ? 'Login in...' : 'Login'
     }}</button>
 </form>
