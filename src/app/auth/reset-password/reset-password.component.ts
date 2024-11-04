@@ -1,21 +1,23 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.css'
+  styleUrls: ['./reset-password.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResetPasswordComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  isLoading = signal(false);
+  isLoading = false;
+  errorMessage = '';
+  successMessage = '';
   oobCode: string | null = null;
   resetPasswordForm = this.fb.group({
     password: ['', [Validators.required, Validators.minLength(6)]]
@@ -30,15 +32,16 @@ export class ResetPasswordComponent implements OnInit {
       return;
     }
     try {
-      this.isLoading.set(true);
+      this.isLoading = true;
       const { password } = this.resetPasswordForm.value;
       await this.authService.resetPassword(this.oobCode!, password!);
-      this.router.navigate(['auth', 'login']);
-    } catch (error) {
-      // handled by auth service
-      return;
+      this.successMessage = 'Password reset successful. Please login with your new password.';
+      this.errorMessage = '';
+    } catch (error: any) {
+      this.errorMessage = error.message;
+      this.successMessage = '';
     } finally {
-      this.isLoading.set(false);
+      this.isLoading = false;
       this.resetPasswordForm.reset();
     }
   }

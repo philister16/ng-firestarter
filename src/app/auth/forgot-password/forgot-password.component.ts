@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../auth.service';
@@ -8,13 +8,15 @@ import { AuthService } from '../auth.service';
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './forgot-password.component.html',
-  styleUrl: './forgot-password.component.css'
+  styleUrls: ['./forgot-password.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ForgotPasswordComponent {
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
-  isLoading = signal(false);
-  successMessage = signal('');
+  isLoading = false;
+  errorMessage = '';
+  successMessage = '';
 
   forgotPasswordForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -23,14 +25,16 @@ export class ForgotPasswordComponent {
   async onSubmit() {
     if (this.forgotPasswordForm.invalid) return;
     try {
-      this.isLoading.set(true);
+      this.isLoading = true;
       const { email } = this.forgotPasswordForm.value;
       await this.authService.passwordResetEmail(email!);
-      this.successMessage.set('Password reset email sent. Please check your email.');
+      this.successMessage = 'Password reset email sent. Please check your email.';
+      this.errorMessage = '';
     } catch (err: any) {
-      // handled in auth service
+      this.errorMessage = err.message;
+      this.successMessage = '';
     } finally {
-      this.isLoading.set(false);
+      this.isLoading = false;
       this.forgotPasswordForm.reset();
     }
   }
