@@ -1,1 +1,20 @@
-<p>signin-with works!</p>
+<div class="social-signin">
+  <button (click)="signInWith(AuthProvider.GOOGLE)" [disabled]="isLoading">
+    {{ isLoading ? 'Signing in...' : 'Sign in with Google' }}
+  </button>
+
+  <!-- Commented out until implemented -->
+  <!--
+      <button
+        (click)="signInWith(AuthProvider.FACEBOOK)"
+        [disabled]="isLoading()">
+        Sign in with Facebook
+      </button>
+
+      <button
+        (click)="signInWith(AuthProvider.APPLE)"
+        [disabled]="isLoading()">
+        Sign in with Apple
+      </button>
+      -->
+</div>

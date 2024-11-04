@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService, AuthProvider } from '../auth.service';
@@ -7,50 +7,30 @@ import { AuthService, AuthProvider } from '../auth.service';
   selector: 'app-signin-with',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="social-signin">
-      <button
-        (click)="signInWith(AuthProvider.GOOGLE)"
-        [disabled]="isLoading()">
-        {{ isLoading() ? 'Signing in...' : 'Sign in with Google' }}
-      </button>
-
-      <!-- Commented out until implemented -->
-      <!--
-      <button
-        (click)="signInWith(AuthProvider.FACEBOOK)"
-        [disabled]="isLoading()">
-        Sign in with Facebook
-      </button>
-
-      <button
-        (click)="signInWith(AuthProvider.APPLE)"
-        [disabled]="isLoading()">
-        Sign in with Apple
-      </button>
-      -->
-    </div>
-  `
+  templateUrl: './signin-with.component.html',
+  styleUrls: ['./signin-with.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SigninWithComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
-  isLoading = signal(false);
+  isLoading = false;
+  errorMessage = '';
 
   // Make AuthProvider enum available in template
   protected AuthProvider = AuthProvider;
 
   async signInWith(provider: AuthProvider): Promise<void> {
-    if (this.isLoading()) return;
+    if (this.isLoading) return;
 
     try {
-      this.isLoading.set(true);
+      this.isLoading = true;
       await this.authService.signInWithProvider(provider);
       this.router.navigate(['/home']);
-    } catch (err) {
-      // Error handled by auth service
+    } catch (err: any) {
+      this.errorMessage = err.message;
     } finally {
-      this.isLoading.set(false);
+      this.isLoading = false;
     }
   }
 }
