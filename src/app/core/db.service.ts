@@ -21,7 +21,11 @@ export class DbService {
     try {
       const docRef = doc(this.firestore, collection, id);
       const docSnap = await getDoc(docRef);
-      return this.mapDoc(docSnap);
+      if (docSnap.exists()) {
+        return this.mapDoc(docSnap);
+      } else {
+        return null;
+      }
     } catch (error) {
       throw this.handleDbError(error as FirestoreError);
     }
@@ -36,6 +40,9 @@ export class DbService {
     if (!collectionName?.trim()) throw new Error('Collection name is required');
     try {
       const querySnapshot = await getDocs(collection(this.firestore, collectionName));
+      if (querySnapshot.empty) {
+        return [];
+      }
       return this.mapDocs(querySnapshot.docs);
     } catch (error) {
       throw this.handleDbError(error as FirestoreError);
@@ -243,6 +250,9 @@ export class DbService {
   private async find(query: Query) {
     try {
       const querySnapshot = await getDocs(query);
+      if (querySnapshot.empty) {
+        return [];
+      }
       return this.mapDocs(querySnapshot.docs);
     } catch (error) {
       throw this.handleDbError(error as FirestoreError);
@@ -250,7 +260,6 @@ export class DbService {
   }
 
   private mapDoc(doc: DocumentSnapshot<DocumentData>) {
-    if (!doc.exists()) return null;
     return {
       id: doc.id,
       ...doc.data()
