@@ -4,7 +4,7 @@ import { ChangeEmailComponent } from './change-email/change-email.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { AvatarEditComponent } from './avatar-edit/avatar-edit.component';
 import { AccountService, UserAccount } from './account.service';
-import { DbStatus } from '../core/interfaces';
+import { AsyncStatus } from '../core/interfaces';
 import { AuthService } from '../auth/auth.service';
 import { DeleteUserComponent } from './delete-user/delete-user.component';
 @Component({
@@ -20,7 +20,7 @@ export class AccountComponent {
   readonly userService = inject(AuthService);
   readonly user = this.userService.user;
   readonly account = computed(() => this.user()?.account);
-  dbStatus = signal<DbStatus>([false, '', '']);
+  dbStatus = signal<AsyncStatus>([false, '', '']);
 
   async updateAccount(update: Partial<UserAccount>): Promise<void> {
     try {

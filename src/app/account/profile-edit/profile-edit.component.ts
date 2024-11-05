@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, input, OnInit, outp
 import { UserAccount } from '../account.service';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { DbStatus } from '../../core/interfaces';
+import { AsyncStatus } from '../../core/interfaces';
 
 @Component({
   selector: 'app-profile-edit',
@@ -14,7 +14,7 @@ import { DbStatus } from '../../core/interfaces';
 })
 export class ProfileEditComponent implements OnInit {
   account = input<Partial<UserAccount> | null>();
-  dbStatus = input<DbStatus>([false, '', '']);
+  dbStatus = input<AsyncStatus>([false, '', '']);
   onUpdate = output<Partial<UserAccount>>();
   nameHasChanged = signal(false);
   private fb = inject(FormBuilder);

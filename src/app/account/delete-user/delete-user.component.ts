@@ -3,7 +3,7 @@ import { AuthService } from '../../auth/auth.service';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { DbStatus } from '../../core/interfaces';
+import { AsyncStatus } from '../../core/interfaces';
 import { Router } from '@angular/router';
 
 @Component({
@@ -18,7 +18,7 @@ export class DeleteUserComponent {
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
-  dbStatus = signal<DbStatus>([false, '', '']);
+  dbStatus = signal<AsyncStatus>([false, '', '']);
 
   deleteUserForm = this.fb.group({
     password: ['', Validators.required],

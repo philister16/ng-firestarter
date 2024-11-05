@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
-import { DbStatus } from '../../core/interfaces';
+import { AsyncStatus } from '../../core/interfaces';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
 export class ChangePasswordComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
-  dbStatus = signal<DbStatus>([false, '', '']);
+  dbStatus = signal<AsyncStatus>([false, '', '']);
   changePasswordForm = this.fb.group({
     password: ['', [Validators.required]],
     newPassword: ['', [Validators.required, Validators.minLength(8)]],

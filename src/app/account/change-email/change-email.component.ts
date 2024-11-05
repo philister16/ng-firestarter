@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
-import { DbStatus } from '../../core/interfaces';
+import { AsyncStatus } from '../../core/interfaces';
 
 @Component({
   selector: 'app-change-email',
@@ -16,7 +16,7 @@ export class ChangeEmailComponent {
   private fb = inject(FormBuilder);
   private user = this.authService.user;
   readonly email = computed(() => this.user()?.auth?.email ?? '');
-  dbStatus = signal<DbStatus>([false, '', '']);
+  dbStatus = signal<AsyncStatus>([false, '', '']);
   showUpdate = signal(false);
 
   changeEmailForm = this.fb.nonNullable.group({

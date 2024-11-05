@@ -1,7 +1,7 @@
 import { Component, input, inject, signal, output, ChangeDetectionStrategy } from '@angular/core';
 import { UserAccount } from '../account.service';
 import { StorageService } from '../../core/storage.service';
-import { DbStatus } from '../../core/interfaces';
+import { AsyncStatus } from '../../core/interfaces';
 import { FirebaseError } from 'firebase/app';
 import { UserData } from '../../auth/auth.service';
 @Component({
@@ -14,7 +14,7 @@ import { UserData } from '../../auth/auth.service';
 })
 export class AvatarEditComponent {
   user = input<UserData | null>();
-  dbStatus = input<DbStatus>([false, '', '']);
+  dbStatus = input<AsyncStatus>([false, '', '']);
   onUpdate = output<Partial<UserAccount>>();
   storageService = inject(StorageService);
   progress = signal<number>(0);

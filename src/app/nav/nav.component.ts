@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
-import { DbStatus } from '../core/interfaces';
+import { AsyncStatus } from '../core/interfaces';
 
 
 @Component({
@@ -15,7 +15,7 @@ import { DbStatus } from '../core/interfaces';
 export class NavComponent {
   private authService = inject(AuthService);
   readonly user = this.authService.user;
-  status = signal<DbStatus>([false, '', '']);
+  status = signal<AsyncStatus>([false, '', '']);
 
 
   async logout() {

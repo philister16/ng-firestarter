@@ -1,8 +1,8 @@
 /**
- * @description Interface for database status
+ * @description An interface for asynchronous status in components
  */
-export interface DbStatus extends Array<any> {
+export interface AsyncStatus extends Array<any> {
   0: boolean; // isUpdating
-  1: string; // error message
-  2: string; // success message
+  1: string | null; // error message
+  2: string | null; // success message
 }
