@@ -13,7 +13,8 @@ export enum AuthState {
 
 export enum UnauthorizedReason {
   EMAIL_NOT_VERIFIED = 'emailNotVerified',
-  INSUFFICIENT_PERMISSIONS = 'insufficientPermissions'
+  INSUFFICIENT_PERMISSIONS = 'insufficientPermissions',
+  USER_DELETED = 'userDeleted'
 }
 
 export enum ActionMode {

@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DbStatus } from '../../core/interfaces';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-delete-user',
@@ -16,6 +17,7 @@ import { DbStatus } from '../../core/interfaces';
 export class DeleteUserComponent {
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
   dbStatus = signal<DbStatus>([false, '', '']);
 
   deleteUserForm = this.fb.group({
@@ -32,6 +34,7 @@ export class DeleteUserComponent {
       const password = this.deleteUserForm.value.password;
       await this.authService.deleteUser(password ?? '');
       this.dbStatus.set([false, '', 'Account deleted successfully']);
+      await this.router.navigate(['/', 'unauthorized'], { queryParams: { reason: 'userDeleted' } });
     } catch (err: any) {
       this.dbStatus.set([false, err.message, '']);
     }

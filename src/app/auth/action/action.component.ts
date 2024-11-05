@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +13,7 @@ import { ActionMode, AuthService, ActionResult } from '../auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ActionComponent implements OnInit {
-  isWorking = false;
+  isWorking = signal(false); // important to use signal to trigger change detection
   errorMessage = '';
   successMessage = '';
   mode: ActionMode | null = null;
@@ -40,22 +40,22 @@ export class ActionComponent implements OnInit {
   }
 
   async handle(): Promise<void> {
-    this.isWorking = true;
     try {
+      this.isWorking.set(true);
       const result: ActionResult = await this.authService.handleAction(this.mode, this.oobCode);
       if (!result.success) {
         throw new Error('Could not handle action');
       }
       switch (result.mode) {
         case ActionMode.VERIFY_EMAIL:
-          this.router.navigate(['/']);
+          await this.router.navigate(['/']);
           break;
         case ActionMode.RECOVER_EMAIL:
-          this.authService.signOut();
+          await this.authService.signOut();
           this.successMessage = result.message;
           break;
         case ActionMode.VERIFY_AND_CHANGE_EMAIL:
-          this.authService.signOut();
+          await this.authService.signOut();
           this.successMessage = result.message;
           break;
       }
@@ -63,7 +63,7 @@ export class ActionComponent implements OnInit {
       this.errorMessage = error.message;
       this.successMessage = '';
     } finally {
-      this.isWorking = false;
+      this.isWorking.set(false);
     }
   }
 

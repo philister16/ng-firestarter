@@ -30,6 +30,9 @@ export class UnauthorizedComponent implements OnInit {
       case UnauthorizedReason.INSUFFICIENT_PERMISSIONS:
         this.content = { heading: 'Insufficient Permissions', message: 'You do not have the necessary permissions to access this page.' };
         break;
+      case UnauthorizedReason.USER_DELETED:
+        this.content = { heading: 'User Deleted', message: 'Your account has been deleted.' };
+        break;
       default:
         this.content = { heading: 'Unauthorized Access', message: 'You are not authorized to access this page.' };
     }
