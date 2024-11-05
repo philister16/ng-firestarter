@@ -33,9 +33,8 @@ export class AvatarEditComponent {
         this.progress.set(status.progress);
       });
       this.onUpdate.emit({ profilePicture: url });
-    } catch (error) {
-      const message = this.storageService.handleError(error as FirebaseError);
-      this.errorMessage.set(message);
+    } catch (error: any) {
+      this.errorMessage.set(error.message);
       throw error;
     }
   }
