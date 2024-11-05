@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
@@ -8,7 +8,8 @@ import { DbStatus } from '../../core/interfaces';
   selector: 'app-change-email',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './change-email.component.html'
+  templateUrl: './change-email.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChangeEmailComponent {
   private authService = inject(AuthService);

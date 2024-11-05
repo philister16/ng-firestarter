@@ -1,4 +1,4 @@
-import { Component, inject, signal, input, OnInit, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, input, OnInit, output } from '@angular/core';
 import { UserAccount } from '../account.service';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -9,7 +9,8 @@ import { DbStatus } from '../../core/interfaces';
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './profile-edit.component.html',
-  styleUrl: './profile-edit.component.css'
+  styleUrl: './profile-edit.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileEditComponent implements OnInit {
   account = input<Partial<UserAccount> | null>();

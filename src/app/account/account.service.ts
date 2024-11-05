@@ -13,7 +13,7 @@ export interface UserAccount {
   country?: string | null;
   profilePicture?: string | null;
 }
-
+// TODO: abstract interaction with DB into a separate service including error handling
 @Injectable({
   providedIn: 'root'
 })

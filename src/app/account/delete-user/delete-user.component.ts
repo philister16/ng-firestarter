@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Validators } from '@angular/forms';
@@ -10,7 +10,8 @@ import { DbStatus } from '../../core/interfaces';
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './delete-user.component.html',
-  styleUrl: './delete-user.component.css'
+  styleUrl: './delete-user.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DeleteUserComponent {
   private authService = inject(AuthService);

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { DbStatus } from '../core/interfaces';
@@ -9,7 +9,8 @@ import { DbStatus } from '../core/interfaces';
   standalone: true,
   imports: [RouterOutlet, RouterLink],
   templateUrl: './nav.component.html',
-  styleUrl: './nav.component.css'
+  styleUrl: './nav.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavComponent {
   private authService = inject(AuthService);
@@ -21,6 +22,7 @@ export class NavComponent {
     try {
       await this.authService.signOut();
     } catch (error) {
+      // TODO: handle error
       console.error('Error during logout:', error);
     }
   }
@@ -31,6 +33,7 @@ export class NavComponent {
       await this.authService.resendEmailVerification();
       this.status.set([false, '', 'Email verification sent. Please check your email.']);
     } catch (error) {
+      // TODO: handle error
       this.status.set([false, 'Error sending email verification.', '']);
     }
   }

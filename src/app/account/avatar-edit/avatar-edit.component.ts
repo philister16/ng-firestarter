@@ -1,4 +1,4 @@
-import { Component, input, inject, signal, output } from '@angular/core';
+import { Component, input, inject, signal, output, ChangeDetectionStrategy } from '@angular/core';
 import { UserAccount } from '../account.service';
 import { StorageService } from '../../core/storage.service';
 import { DbStatus } from '../../core/interfaces';
@@ -9,7 +9,8 @@ import { UserData } from '../../auth/auth.service';
   standalone: true,
   imports: [],
   templateUrl: './avatar-edit.component.html',
-  styleUrl: './avatar-edit.component.css'
+  styleUrl: './avatar-edit.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AvatarEditComponent {
   user = input<UserData | null>();

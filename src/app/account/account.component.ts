@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { ProfileEditComponent } from './profile-edit/profile-edit.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
@@ -12,7 +12,8 @@ import { DeleteUserComponent } from './delete-user/delete-user.component';
   standalone: true,
   imports: [ProfileEditComponent, AvatarEditComponent, ChangeEmailComponent, ChangePasswordComponent, DeleteUserComponent],
   templateUrl: './account.component.html',
-  styleUrl: './account.component.css'
+  styleUrl: './account.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AccountComponent {
   readonly accountService = inject(AccountService);
